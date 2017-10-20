@@ -9,6 +9,7 @@ jobs:
       - run:
           command: |
             mkdir coverage_reports
+            pip install numpy
             pip install -r requirements.txt
       - run:
           command: |
