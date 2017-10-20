@@ -18,18 +18,22 @@ class AlphaVantage:
         self.session = requests.Session()
 
     def get_time_series_data(self, symbol, series_type="daily", fmt="df",
-                             **kwargs):
+                             adjusted=True, start_date=None, **kwargs):
         """
         :param symbol:
         :param series_type: DAILY, WEEKLY or MONTHLY
-        :param fmt:
+        :param fmt: "df" or "json"
+        :param adjusted: Whether to get adjusted data (typically what you want).
         :param kwargs: These are passthrough as additional keywords to control
             the output. E.g., outputsize="full" provides 20 year data rather
             than just 100 data points.
-        :return:
+        :return: pandas.DataFrame.
         """
+        func = "TIME_SERIES_%s" % series_type.upper()
+        if adjusted:
+            func += "_ADJUSTED"
         payload = {
-            "function": "TIME_SERIES_%s" % series_type.upper(),
+            "function": func,
             "symbol": symbol,
             "apikey": self.api_key
         }
@@ -57,11 +61,14 @@ class AlphaVantage:
             data = []
             for k, v in timeseries.items():
                 date = datetime.strptime(k, "%Y-%m-%d")
-                index.append(date)
+                index.append(date.date())
                 row = [float(v[k2]) for k2 in sorted(v.keys())]
                 data.append(row)
             columns = [s.split(".")[-1].strip() for s in sorted(v.keys())]
-            return pd.DataFrame(data, index=index, columns=columns)
+            df = pd.DataFrame(data, index=index, columns=columns)
+            if start_date:
+                return df[df.index >= start_date]
+            return df
 
         raise ValueError("REST query returned with error status code {}"
                          .format(response.status_code))
