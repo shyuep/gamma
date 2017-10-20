@@ -8,11 +8,14 @@ jobs:
       - checkout
       - run:
           command: |
+            python3 -m venv venv
+            . venv/bin/activate
             mkdir coverage_reports
             pip install numpy
             pip install -r requirements.txt
       - run:
           command: |
+            . venv/bin/activate
             python setup.py develop
             export ALPHA_VANTAGE_APIKEY=RNR9G9L6S01H3TRV
             nosetests --config=nose.cfg --cover-html --cover-html-dir=coverage_reports
