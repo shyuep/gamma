@@ -1,0 +1,34 @@
+version: 2
+jobs:
+  py3test:
+    working_directory: ~/gamma
+    docker:
+        - image: circleci/python:3.6.1
+    steps:
+      - checkout
+      - run:
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            mkdir coverage_reports
+            pip install numpy
+            pip install -r requirements.txt -r requirements-ci.txt
+      - run:
+          command: |
+            . venv/bin/activate
+            python setup.py develop
+            export ALPHA_VANTAGE_APIKEY=RNR9G9L6S01H3TRV
+            nosetests --config=nose.cfg --cover-html --cover-html-dir=coverage_reports
+            # coveralls
+          no_output_timeout: 3600
+      - store_artifacts:
+          path: coverage_reports/
+          destination: tr1
+      - store_test_results:
+          path: coverage_reports/
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - py3test
