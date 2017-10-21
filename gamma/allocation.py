@@ -17,6 +17,8 @@ def rebalance_contributions(current_balance, target_allocation,
     if current_balance.keys() != target_allocation.keys():
         raise ValueError("current_balance and target_allocation must have the "
                          "same keys!")
+    if abs(sum(target_allocation.values()) - 1) > 0.001:
+        raise ValueError("Target allocation must sum to 1!")
     assets = sorted(current_balance.keys())
     allocation_abs = [target_allocation[k] * total - current_balance[k]
                       for k in assets]
@@ -32,10 +34,10 @@ import unittest
 class FuncTest(unittest.TestCase):
 
     def test_rebalance_contributions(self):
-        current_balance = {"A": 110, "B": 98, "C": 100}
-        target_allocation = {"A": 1/3, "B": 1/3, "C": 1/3}
+        current_balance = {"A": 110, "B": 198, "C": 90}
+        target_allocation = {"A": 1/4, "B": 1/2, "C": 1/4}
         df = rebalance_contributions(current_balance, target_allocation, 100)
-        self.assertAlmostEqual(df["Allocation %"]["A"], 0.26)
+        self.assertAlmostEqual(df["Allocation %"]["A"], 0.145)
 
 
 if __name__ == "__main__":
