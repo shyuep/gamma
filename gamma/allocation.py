@@ -14,16 +14,13 @@ def rebalance_contributions(current_balance, target_allocation,
         C            36.0          0.36
     """
     total = sum(current_balance.values()) + future_contributions
-    if current_balance.keys() != target_allocation.keys():
-        raise ValueError("current_balance and target_allocation must have the "
-                         "same keys!")
     if abs(sum(target_allocation.values()) - 1) > 0.001:
         raise ValueError("Target allocation must sum to 1!")
     assets = sorted(current_balance.keys())
-    allocation_abs = [target_allocation[k] * total - current_balance[k]
+    allocation_abs = [target_allocation.get(k, 0) * total
+                      - current_balance.get(k, 0)
                       for k in assets]
-    df = pd.DataFrame({"Allocation abs": allocation_abs},
-                       index=assets)
+    df = pd.DataFrame({"Allocation abs": allocation_abs}, index=assets)
     df["Allocation %"] = df["Allocation abs"] / sum(df["Allocation abs"])
     return df
 
